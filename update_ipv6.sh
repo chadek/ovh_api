@@ -10,13 +10,13 @@ txt_type="AAAA"
 txt_field="hostname"
 txt_value="$(curl -s6 ifconfig.io)"
 
-# get record id 
+# get record id
 HTTP_QUERY="https://eu.api.ovh.com/1.0/domain/zone/${DOMAIN_NAME}/record?fieldType=${txt_type}&subDomain=${txt_field}"
 HTTP_BODY=""
 TIME=$(curl -s https://api.ovh.com/1.0/auth/time)
 CLEAR_SIGN=$OVH_APP_SECRET"+"$OVH_CONSUMER_KEY"+"$HTTP_METHOD"+"$HTTP_QUERY"+"$HTTP_BODY"+"$TIME
 SIG='$1$'$(echo -n $CLEAR_SIGN | openssl dgst -sha1 -hex | cut -f 2 -d ' ' )
-record_id=$(curl -X $HTTP_METHOD \
+record_id=$(curl -s -X $HTTP_METHOD \
 $HTTP_QUERY \
 -H "Content-Type: application/json" \
 -H "X-Ovh-Application: ${OVH_APP_KEY}" \
@@ -34,7 +34,7 @@ TIME=$(curl -s https://api.ovh.com/1.0/auth/time)
 CLEAR_SIGN=$OVH_APP_SECRET"+"$OVH_CONSUMER_KEY"+"$HTTP_METHOD"+"$HTTP_QUERY"+"$HTTP_BODY"+"$TIME
 SIG='$1$'$(echo -n $CLEAR_SIGN | openssl dgst -sha1 -hex | cut -f 2 -d ' ' )
 
-curl -X $HTTP_METHOD \
+curl -s -o /dev/null -X $HTTP_METHOD \
 $HTTP_QUERY \
 -H "Content-Type: application/json" \
 -H "X-Ovh-Application: ${OVH_APP_KEY}" \
