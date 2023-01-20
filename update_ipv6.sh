@@ -4,16 +4,21 @@
 OVH_CONSUMER_KEY=XXXXXX
 OVH_APP_KEY=XXXXXXX
 OVH_APP_SECRET=XXXXX
+OVH_API_URL="https://eu.api.ovh.com/1.0"
 DOMAIN_NAME=domaine-name.mydomain
 HTTP_METHOD="GET"
 txt_type="AAAA"
 txt_field="hostname"
 txt_value="$(curl -s6 ifconfig.io)"
 
+get_time () {
+  curl -s https://api.ovh.com/1.0/auth/time
+}
+
 # get record id
-HTTP_QUERY="https://eu.api.ovh.com/1.0/domain/zone/${DOMAIN_NAME}/record?fieldType=${txt_type}&subDomain=${txt_field}"
+HTTP_QUERY="${OVH_API_URL}/domain/zone/${DOMAIN_NAME}/record?fieldType=${txt_type}&subDomain=${txt_field}"
 HTTP_BODY=""
-TIME=$(curl -s https://api.ovh.com/1.0/auth/time)
+TIME=$(get_time)
 CLEAR_SIGN=$OVH_APP_SECRET"+"$OVH_CONSUMER_KEY"+"$HTTP_METHOD"+"$HTTP_QUERY"+"$HTTP_BODY"+"$TIME
 SIG='$1$'$(echo -n $CLEAR_SIGN | openssl dgst -sha1 -hex | cut -f 2 -d ' ' )
 record_id=$(curl -s -X $HTTP_METHOD \
@@ -30,7 +35,7 @@ record_id=${record_id:1:-1}
 HTTP_METHOD="PUT"
 HTTP_QUERY="https://eu.api.ovh.com/1.0/domain/zone/${DOMAIN_NAME}/record/${record_id}"
 HTTP_BODY={"\"subDomain\"":"\"$txt_field\"","\"target\"":"\"$txt_value\""};
-TIME=$(curl -s https://api.ovh.com/1.0/auth/time)
+TIME=$(get_time)
 CLEAR_SIGN=$OVH_APP_SECRET"+"$OVH_CONSUMER_KEY"+"$HTTP_METHOD"+"$HTTP_QUERY"+"$HTTP_BODY"+"$TIME
 SIG='$1$'$(echo -n $CLEAR_SIGN | openssl dgst -sha1 -hex | cut -f 2 -d ' ' )
 
@@ -47,7 +52,7 @@ $HTTP_QUERY \
 HTTP_METHOD="POST"
 HTTP_QUERY="https://eu.api.ovh.com/1.0/domain/zone/${DOMAIN_NAME}/refresh"
 HTTP_BODY=""
-TIME=$(curl -s https://api.ovh.com/1.0/auth/time)
+TIME=$(get_time)
 CLEAR_SIGN=$OVH_APP_SECRET"+"$OVH_CONSUMER_KEY"+"$HTTP_METHOD"+"$HTTP_QUERY"+"$HTTP_BODY"+"$TIME
 SIG='$1$'$(echo -n $CLEAR_SIGN | openssl dgst -sha1 -hex | cut -f 2 -d ' ' )
 
